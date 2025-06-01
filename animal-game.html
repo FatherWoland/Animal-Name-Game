@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Animal Name Game - Learn About Animals!</title>
+    <style>
+        body {
+            font-family: 'Comic Sans MS', 'Arial', sans-serif;
+            background: linear-gradient(to bottom, #87CEEB, #98FB98);
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+        }
+
+        .game-container {
+            background: white;
+            border-radius: 30px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            max-width: 800px;
+            width: 100%;
+            text-align: center;
+        }
+
+        h1 {
+            color: #FF6B6B;
+            font-size: 3em;
+            margin-bottom: 20px;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.1);
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .microphone-section {
+            margin: 30px 0;
+        }
+
+        .mic-button {
+            background: #4ECDC4;
+            border: none;
+            border-radius: 50%;
+            width: 120px;
+            height: 120px;
+            font-size: 3em;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(78, 205, 196, 0.3);
+        }
+
+        .mic-button:hover {
+            transform: scale(1.1);
+        }
+
+        .mic-button.listening {
+            background: #95E1D3;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(78, 205, 196, 0.7); }
+            70% { box-shadow: 0 0 0 30px rgba(78, 205, 196, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(78, 205, 196, 0); }
+        }
+
+        .status {
+            font-size: 1.5em;
+            color: #666;
+            margin: 20px 0;
+            min-height: 40px;
+        }
+
+        .animal-display {
+            display: none;
+            margin-top: 30px;
+        }
+
+        .animal-scene {
+            background: #F0F8FF;
+            border-radius: 20px;
+            padding: 20px;
+            margin: 20px 0;
+            min-height: 300px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .animal-emoji {
+            font-size: 100px;
+            animation: animalMove 3s ease-in-out infinite;
+        }
+
+        @keyframes animalMove {
+            0%, 100% { transform: translateX(0) rotate(0deg); }
+            25% { transform: translateX(50px) rotate(5deg); }
+            75% { transform: translateX(-50px) rotate(-5deg); }
+        }
+
+        .habitat {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: -1;
+        }
+
+        .facts-section {
+            background: #FFE5E5;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .fact {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            font-size: 1.2em;
+            color: #333;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            opacity: 0;
+            animation: fadeIn 0.5s forwards;
+        }
+
+        .fact:nth-child(1) { animation-delay: 0.5s; }
+        .fact:nth-child(2) { animation-delay: 1s; }
+        .fact:nth-child(3) { animation-delay: 1.5s; }
+
+        @keyframes fadeIn {
+            to { opacity: 1; transform: translateY(0); }
+            from { opacity: 0; transform: translateY(20px); }
+        }
+
+        .instruction {
+            color: #666;
+            font-size: 1.3em;
+            margin: 20px 0;
+        }
+
+        .heard-text {
+            color: #4ECDC4;
+            font-weight: bold;
+        }
+
+        .controls {
+            margin: 20px 0;
+        }
+
+        button {
+            background: #FF6B6B;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            padding: 10px 25px;
+            font-size: 1.1em;
+            cursor: pointer;
+            margin: 0 10px;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            background: #FF5252;
+            transform: translateY(-2px);
+        }
+
+        .animals-list {
+            background: #F9F9F9;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .animals-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .animal-tag {
+            background: #E8F5E9;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 1em;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .animal-tag:hover {
+            background: #C8E6C9;
+            transform: scale(1.05);
+        }
+
+        /* Habitat backgrounds */
+        .habitat-forest {
+            background: linear-gradient(to bottom, #87CEEB 0%, #98FB98 60%, #654321 60%);
+        }
+
+        .habitat-ocean {
+            background: linear-gradient(to bottom, #87CEEB 0%, #4682B4 40%, #000080 100%);
+        }
+
+        .habitat-savanna {
+            background: linear-gradient(to bottom, #87CEEB 0%, #F4A460 50%, #DEB887 100%);
+        }
+
+        .habitat-farm {
+            background: linear-gradient(to bottom, #87CEEB 0%, #90EE90 50%, #228B22 100%);
+        }
+
+        .habitat-jungle {
+            background: linear-gradient(to bottom, #87CEEB 0%, #228B22 30%, #006400 100%);
+        }
+
+        .habitat-arctic {
+            background: linear-gradient(to bottom, #E0F2F1 0%, #B2EBF2 50%, #E1F5FE 100%);
+        }
+
+        .habitat-desert {
+            background: linear-gradient(to bottom, #87CEEB 0%, #FFD700 50%, #DEB887 100%);
+        }
+
+        .habitat-mountain {
+            background: linear-gradient(to bottom, #87CEEB 0%, #A9A9A9 50%, #696969 100%);
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>🦁 Animal Name Game 🐘</h1>
+        
+        <div class="instruction">
+            Say an animal name to learn fun facts about it!
+        </div>
+        
+        <div class="microphone-section">
+            <button class="mic-button" id="micButton" onclick="toggleListening()">
+                🎤
+            </button>
+        </div>
+        
+        <div class="status" id="status">
+            Click the microphone and say an animal name!
+        </div>
+        
+        <div class="animal-display" id="animalDisplay">
+            <div class="animal-scene" id="animalScene">
+                <div class="habitat" id="habitat"></div>
+                <div class="animal-emoji" id="animalEmoji"></div>
+            </div>
+            
+            <div class="facts-section" id="factsSection">
+                <!-- Facts will be inserted here -->
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button onclick="showAnimalsList()">Show Animals List</button>
+            <button onclick="speakInstructions()">How to Play</button>
+        </div>
+        
+        <div class="animals-list" id="animalsList" style="display: none;">
+            <h3>Try saying one of these animals:</h3>
+            <div class="animals-grid" id="animalsGrid"></div>
+        </div>
+    </div>
+
+    <script>
+        // Animal database with 50 animals
+        const animals = {
+            // Household pets
+            'dog': {
+                emoji: '🐕',
+                habitat: 'farm',
+                facts: [
+                    'Dogs have been human companions for over 15,000 years!',
+                    'A dog\'s nose print is unique, just like a human fingerprint.',
+                    'Dogs can learn over 150 words and can even count to 4 or 5!'
+                ]
+            },
+            'cat': {
+                emoji: '🐱',
+                habitat: 'farm',
+                facts: [
+                    'Cats sleep for 12-16 hours a day - that\'s a lot of napping!',
+                    'A cat can jump up to 6 times its own height.',
+                    'Cats have 32 muscles in each ear to help them hear better!'
+                ]
+            },
+            'rabbit': {
+                emoji: '🐰',
+                habitat: 'forest',
+                facts: [
+                    'Rabbits can hop up to 3 feet high and 10 feet long!',
+                    'A rabbit\'s teeth never stop growing throughout their life.',
+                    'Rabbits can see nearly 360 degrees around them!'
+                ]
+            },
+            'hamster': {
+                emoji: '🐹',
+                habitat: 'farm',
+                facts: [
+                    'Hamsters can store food in their cheeks and carry it to their home!',
+                    'A hamster can run up to 8 miles in a single night on their wheel.',
+                    'Hamsters are born blind and without fur!'
+                ]
+            },
+            'fish': {
+                emoji: '🐠',
+                habitat: 'ocean',
+                facts: [
+                    'Some fish can recognize human faces!',
+                    'Fish have been on Earth for more than 500 million years.',
+                    'Many fish can see colors that humans cannot see!'
+                ]
+            },
+            // Farm animals
+            'cow': {
+                emoji: '🐄',
+                habitat: 'farm',
+                facts: [
+                    'Cows have best friends and get stressed when separated!',
+                    'A cow can climb stairs but cannot climb down.',
+                    'Cows can sleep standing up but only dream when lying down!'
+                ]
+            },
+            'pig': {
+                emoji: '🐷',
+                habitat: 'farm',
+                facts: [
+                    'Pigs are very smart - smarter than dogs and 3-year-old children!',
+                    'Pigs love to play and can learn to play video games.',
+                    'Pigs can\'t sweat, so they roll in mud to stay cool!'
+                ]
+            },
+            'sheep': {
+                emoji: '🐑',
+                habitat: 'farm',
+                facts: [
+                    'Sheep have excellent memories and can remember faces for years!',
+                    'A sheep\'s wool never stops growing.',
+                    'Sheep have rectangular pupils that help them see behind themselves!'
+                ]
+            },
+            'chicken': {
+                emoji: '🐔',
+                habitat: 'farm',
+                facts: [
+                    'Chickens can remember over 100 different faces!',
+                    'Chickens dream when they sleep, just like humans do.',
+                    'A mother hen talks to her chicks while they\'re still in the eggs!'
+                ]
+            },
+            'horse': {
+                emoji: '🐴',
+                habitat: 'farm',
+                facts: [
+                    'Horses can sleep both standing up and lying down!',
+                    'A horse\'s teeth take up more space in their head than their brain.',
+                    'Horses can run within hours after being born!'
+                ]
+            },
+            // Wild animals
+            'lion': {
+                emoji: '🦁',
+                habitat: 'savanna',
+                facts: [
+                    'A lion\'s roar can be heard from 5 miles away!',
+                    'Lions are the only cats that live in groups called prides.',
+                    'Lions sleep up to 20 hours a day to save energy!'
+                ]
+            },
+            'elephant': {
+                emoji: '🐘',
+                habitat: 'savanna',
+                facts: [
+                    'Elephants are the only animals that can\'t jump!',
+                    'An elephant\'s trunk has over 40,000 muscles in it.',
+                    'Elephants can "hear" with their feet by feeling vibrations!'
+                ]
+            },
+            'giraffe': {
+                emoji: '🦒',
+                habitat: 'savanna',
+                facts: [
+                    'A giraffe\'s tongue is 20 inches long and purple!',
+                    'Giraffes only need 30 minutes of sleep per day.',
+                    'A giraffe\'s heart weighs 25 pounds to pump blood up its long neck!'
+                ]
+            },
+            'zebra': {
+                emoji: '🦓',
+                habitat: 'savanna',
+                facts: [
+                    'Every zebra has unique stripes, like human fingerprints!',
+                    'Zebras can run up to 40 miles per hour.',
+                    'A group of zebras is called a dazzle!'
+                ]
+            },
+            'monkey': {
+                emoji: '🐵',
+                habitat: 'jungle',
+                facts: [
+                    'Monkeys can learn to use tools and even money!',
+                    'Some monkeys can count and do simple math.',
+                    'Monkeys peel their bananas and don\'t eat the skin!'
+                ]
+            },
+            'tiger': {
+                emoji: '🐅',
+                habitat: 'jungle',
+                facts: [
+                    'No two tigers have the same stripes - they\'re all unique!',
+                    'Tigers are excellent swimmers and love the water.',
+                    'A tiger\'s roar can be heard 2 miles away!'
+                ]
+            },
+            'bear': {
+                emoji: '🐻',
+                habitat: 'forest',
+                facts: [
+                    'Bears can run up to 30 miles per hour - faster than a horse!',
+                    'Bears have an excellent sense of smell, 7 times better than a dog.',
+                    'Some bears can climb trees and are excellent swimmers!'
+                ]
+            },
+            'wolf': {
+                emoji: '🐺',
+                habitat: 'forest',
+                facts: [
+                    'Wolves can run up to 40 miles per hour when chasing prey!',
+                    'A wolf pack is led by an alpha male and female.',
+                    'Wolves howl to communicate with their pack over long distances!'
+                ]
+            },
+            'fox': {
+                emoji: '🦊',
+                habitat: 'forest',
+                facts: [
+                    'Foxes use their tails for balance and as a warm blanket!',
+                    'Arctic foxes can handle temperatures as low as -70°C.',
+                    'Foxes can make over 40 different sounds!'
+                ]
+            },
+            'deer': {
+                emoji: '🦌',
+                habitat: 'forest',
+                facts: [
+                    'Only male deer grow antlers, and they fall off every year!',
+                    'A deer can jump up to 10 feet high and 30 feet long.',
+                    'Baby deer are called fawns and can walk within hours of birth!'
+                ]
+            },
+            // Ocean animals
+            'dolphin': {
+                emoji: '🐬',
+                habitat: 'ocean',
+                facts: [
+                    'Dolphins have names for each other and call out to friends!',
+                    'Dolphins sleep with one half of their brain at a time.',
+                    'Dolphins can swim up to 20 miles per hour!'
+                ]
+            },
+            'whale': {
+                emoji: '🐋',
+                habitat: 'ocean',
+                facts: [
+                    'The blue whale is the largest animal that ever lived!',
+                    'Whales sing songs that can be heard hundreds of miles away.',
+                    'A whale\'s heart can weigh as much as a car!'
+                ]
+            },
+            'shark': {
+                emoji: '🦈',
+                habitat: 'ocean',
+                facts: [
+                    'Sharks have been around for 400 million years!',
+                    'Sharks never run out of teeth - they can grow thousands in a lifetime.',
+                    'Some sharks can detect a drop of blood from 3 miles away!'
+                ]
+            },
+            'octopus': {
+                emoji: '🐙',
+                habitat: 'ocean',
+                facts: [
+                    'An octopus has 3 hearts and blue blood!',
+                    'Octopuses can change color in just 0.3 seconds.',
+                    'Each octopus arm can think and act on its own!'
+                ]
+            },
+            'turtle': {
+                emoji: '🐢',
+                habitat: 'ocean',
+                facts: [
+                    'Some turtles can live for over 100 years!',
+                    'Sea turtles return to the same beach where they were born to lay eggs.',
+                    'Turtles have been on Earth for over 200 million years!'
+                ]
+            },
+            'seal': {
+                emoji: '🦭',
+                habitat: 'ocean',
+                facts: [
+                    'Seals can hold their breath underwater for up to 2 hours!',
+                    'Baby seals are called pups and can swim at birth.',
+                    'Seals can sleep underwater and come up for air without waking!'
+                ]
+            },
+            'crab': {
+                emoji: '🦀',
+                habitat: 'ocean',
+                facts: [
+                    'Crabs can walk in all directions but usually walk sideways!',
+                    'If a crab loses a claw, it can grow a new one.',
+                    'Some crabs can live on land and only return to the sea to breed!'
+                ]
+            },
+            // Birds
+            'eagle': {
+                emoji: '🦅',
+                habitat: 'mountain',
+                facts: [
+                    'Eagles can see 4-8 times better than humans!',
+                    'An eagle can fly up to 10,000 feet high.',
+                    'Eagles can live up to 30 years in the wild!'
+                ]
+            },
+            'owl': {
+                emoji: '🦉',
+                habitat: 'forest',
+                facts: [
+                    'Owls can turn their heads 270 degrees!',
+                    'Owls are silent flyers - their prey can\'t hear them coming.',
+                    'A group of owls is called a parliament!'
+                ]
+            },
+            'parrot': {
+                emoji: '🦜',
+                habitat: 'jungle',
+                facts: [
+                    'Some parrots can learn over 100 words!',
+                    'Parrots can live for over 80 years.',
+                    'Parrots are one of the few animals that can dance to music!'
+                ]
+            },
+            'penguin': {
+                emoji: '🐧',
+                habitat: 'arctic',
+                facts: [
+                    'Penguins can\'t fly but are excellent swimmers!',
+                    'Emperor penguins can hold their breath for 20 minutes underwater.',
+                    'Penguin dads keep eggs warm on their feet for 2 months!'
+                ]
+            },
+            'flamingo': {
+                emoji: '🦩',
+                habitat: 'ocean',
+                facts: [
+                    'Flamingos are pink because of the shrimp they eat!',
+                    'Flamingos often stand on one leg to keep warm.',
+                    'A group of flamingos is called a flamboyance!'
+                ]
+            },
+            // Reptiles & Others
+            'snake': {
+                emoji: '🐍',
+                habitat: 'desert',
+                facts: [
+                    'Snakes smell with their tongues!',
+                    'Some snakes can go a whole year without eating.',
+                    'Snakes can\'t hear sounds but feel vibrations through the ground!'
+                ]
+            },
+            'lizard': {
+                emoji: '🦎',
+                habitat: 'desert',
+                facts: [
+                    'Some lizards can detach their tails to escape predators!',
+                    'Chameleons can move their eyes in different directions at once.',
+                    'The smallest lizard is only 16mm long!'
+                ]
+            },
+            'crocodile': {
+                emoji: '🐊',
+                habitat: 'jungle',
+                facts: [
+                    'Crocodiles have the strongest bite of any animal!',
+                    'Crocodiles can live for over 70 years.',
+                    'Crocodiles cry when they eat - but not because they\'re sad!'
+                ]
+            },
+            'frog': {
+                emoji: '🐸',
+                habitat: 'jungle',
+                facts: [
+                    'Frogs drink water through their skin!',
+                    'Some frogs can jump 20 times their body length.',
+                    'A group of frogs is called an army!'
+                ]
+            },
+            // More animals
+            'koala': {
+                emoji: '🐨',
+                habitat: 'forest',
+                facts: [
+                    'Koalas sleep up to 22 hours a day!',
+                    'Koalas have fingerprints just like humans.',
+                    'Baby koalas are called joeys and are only 2cm when born!'
+                ]
+            },
+            'panda': {
+                emoji: '🐼',
+                habitat: 'forest',
+                facts: [
+                    'Pandas eat bamboo for 14 hours a day!',
+                    'A panda\'s black and white colors help it hide in shadows.',
+                    'Baby pandas are pink and smaller than a mouse when born!'
+                ]
+            },
+            'kangaroo': {
+                emoji: '🦘',
+                habitat: 'savanna',
+                facts: [
+                    'Kangaroos can\'t walk backwards!',
+                    'A kangaroo can jump 30 feet in a single leap.',
+                    'Baby kangaroos are called joeys and live in their mom\'s pouch!'
+                ]
+            },
+            'raccoon': {
+                emoji: '🦝',
+                habitat: 'forest',
+                facts: [
+                    'Raccoons wash their food before eating it!',
+                    'Raccoons have very sensitive hands and can open jars.',
+                    'A raccoon\'s black mask helps reduce glare and see better!'
+                ]
+            },
+            'hedgehog': {
+                emoji: '🦔',
+                habitat: 'forest',
+                facts: [
+                    'Hedgehogs have about 5,000 spines on their backs!',
+                    'Baby hedgehogs are called hoglets.',
+                    'Hedgehogs are immune to some snake venom!'
+                ]
+            },
+            'squirrel': {
+                emoji: '🐿️',
+                habitat: 'forest',
+                facts: [
+                    'Squirrels plant thousands of trees by forgetting where they buried nuts!',
+                    'Squirrels can jump 10 times their body length.',
+                    'A squirrel\'s front teeth never stop growing!'
+                ]
+            },
+            'bat': {
+                emoji: '🦇',
+                habitat: 'forest',
+                facts: [
+                    'Bats are the only mammals that can truly fly!',
+                    'Bats use echolocation to see in the dark.',
+                    'Some bats can eat 1,000 mosquitoes in an hour!'
+                ]
+            },
+            'bee': {
+                emoji: '🐝',
+                habitat: 'forest',
+                facts: [
+                    'Bees dance to tell other bees where to find flowers!',
+                    'A bee has 5 eyes - 2 large ones and 3 small ones.',
+                    'Bees must visit 2 million flowers to make one pound of honey!'
+                ]
+            },
+            'butterfly': {
+                emoji: '🦋',
+                habitat: 'forest',
+                facts: [
+                    'Butterflies taste with their feet!',
+                    'Some butterflies can fly up to 30 miles per hour.',
+                    'Butterflies can see ultraviolet colors that we can\'t see!'
+                ]
+            },
+            'ladybug': {
+                emoji: '🐞',
+                habitat: 'forest',
+                facts: [
+                    'Ladybugs can eat up to 5,000 insects in their lifetime!',
+                    'A ladybug\'s bright colors warn predators that they taste bad.',
+                    'Ladybugs are considered good luck in many cultures!'
+                ]
+            },
+            'spider': {
+                emoji: '🕷️',
+                habitat: 'forest',
+                facts: [
+                    'Spiders have 8 legs and up to 8 eyes!',
+                    'Spider silk is stronger than steel of the same thickness.',
+                    'Most spiders are helpful and eat pesky insects!'
+                ]
+            },
+            'ant': {
+                emoji: '🐜',
+                habitat: 'forest',
+                facts: [
+                    'Ants can lift 20 times their own body weight!',
+                    'Some ant colonies can have millions of ants working together.',
+                    'Ants leave scent trails so other ants can follow them to food!'
+                ]
+            },
+            'camel': {
+                emoji: '🐪',
+                habitat: 'desert',
+                facts: [
+                    'Camels can go weeks without drinking water!',
+                    'A camel\'s hump stores fat, not water.',
+                    'Camels have three eyelids to protect their eyes from sand!'
+                ]
+            }
+        };
+
+        // Speech recognition setup
+        let recognition;
+        let isListening = false;
+        let speechSynthesis = window.speechSynthesis;
+
+        // Initialize speech recognition
+        if ('webkitSpeechRecognition' in window) {
+            recognition = new webkitSpeechRecognition();
+        } else if ('SpeechRecognition' in window) {
+            recognition = new SpeechRecognition();
+        }
+
+        if (recognition) {
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            recognition.lang = 'en-US';
+
+            recognition.onstart = function() {
+                isListening = true;
+                document.getElementById('micButton').classList.add('listening');
+                updateStatus('Listening... Say an animal name!');
+            };
+
+            recognition.onend = function() {
+                isListening = false;
+                document.getElementById('micButton').classList.remove('listening');
+                updateStatus('Click the microphone to start again!');
+            };
+
+            recognition.onresult = function(event) {
+                let finalTranscript = '';
+                
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    if (event.results[i].isFinal) {
+                        finalTranscript += event.results[i][0].transcript;
+                    }
+                }
+
+                if (finalTranscript) {
+                    processAnimalName(finalTranscript.toLowerCase().trim());
+                }
+            };
+
+            recognition.onerror = function(event) {
+                console.error('Speech recognition error:', event.error);
+                updateStatus('Oops! Please try again.');
+                isListening = false;
+                document.getElementById('micButton').classList.remove('listening');
+            };
+        }
+
+        function toggleListening() {
+            if (!recognition) {
+                updateStatus('Speech recognition not supported in this browser.');
+                return;
+            }
+
+            if (isListening) {
+                recognition.stop();
+            } else {
+                recognition.start();
+            }
+        }
+
+        function updateStatus(message) {
+            document.getElementById('status').innerHTML = message;
+        }
+
+        function processAnimalName(transcript) {
+            updateStatus(`I heard: <span class="heard-text">"${transcript}"</span>`);
+            
+            // Check for animal names in the transcript
+            let foundAnimal = null;
+            for (let animal in animals) {
+                if (transcript.includes(animal)) {
+                    foundAnimal = animal;
+                    break;
+                }
+            }
+
+            if (foundAnimal) {
+                showAnimal(foundAnimal);
+            } else {
+                updateStatus(`I heard "${transcript}" but I don't know that animal yet. Try another!`);
+            }
+        }
+
+        function showAnimal(animalName) {
+            const animal = animals[animalName];
+            
+            // Hide any previous display
+            document.getElementById('animalDisplay').style.display = 'none';
+            
+            // Set up the scene
+            const scene = document.getElementById('animalScene');
+            const habitat = document.getElementById('habitat');
+            const emoji = document.getElementById('animalEmoji');
+            
+            // Set habitat
+            habitat.className = 'habitat habitat-' + animal.habitat;
+            
+            // Set animal emoji
+            emoji.textContent = animal.emoji;
+            
+            // Show the display
+            document.getElementById('animalDisplay').style.display = 'block';
+            
+            // Clear previous facts
+            const factsSection = document.getElementById('factsSection');
+            factsSection.innerHTML = '<h2>Fun Facts about ' + animalName.charAt(0).toUpperCase() + animalName.slice(1) + 's!</h2>';
+            
+            // Add facts with delay
+            animal.facts.forEach((fact, index) => {
+                const factDiv = document.createElement('div');
+                factDiv.className = 'fact';
+                factDiv.textContent = (index + 1) + '. ' + fact;
+                factsSection.appendChild(factDiv);
+            });
+            
+            // Speak the animal name and facts
+            speakAnimalFacts(animalName, animal.facts);
+        }
+
+        function speakAnimalFacts(animalName, facts) {
+            if (!speechSynthesis) return;
+            
+            // Cancel any ongoing speech
+            speechSynthesis.cancel();
+            
+            // Create introduction
+            const intro = new SpeechSynthesisUtterance(
+                `Let's learn about ${animalName}s! Here are three amazing facts.`
+            );
+            
+            // Set British accent if available
+            setBritishVoice(intro);
+            
+            speechSynthesis.speak(intro);
+            
+            // Speak each fact
+            facts.forEach((fact, index) => {
+                const utterance = new SpeechSynthesisUtterance(
+                    `Fact number ${index + 1}: ${fact}`
+                );
+                setBritishVoice(utterance);
+                speechSynthesis.speak(utterance);
+            });
+        }
+
+        function setBritishVoice(utterance) {
+            const voices = speechSynthesis.getVoices();
+            
+            // Try to find a British English voice
+            const britishVoice = voices.find(voice => 
+                voice.lang === 'en-GB' || 
+                voice.name.includes('British') ||
+                voice.name.includes('UK')
+            );
+            
+            if (britishVoice) {
+                utterance.voice = britishVoice;
+            }
+            
+            // Set speech parameters for friendly tone
+            utterance.rate = 0.9; // Slightly slower for clarity
+            utterance.pitch = 1.1; // Slightly higher for friendliness
+            utterance.volume = 1.0;
+        }
+
+        function showAnimalsList() {
+            const listDiv = document.getElementById('animalsList');
+            const grid = document.getElementById('animalsGrid');
+            
+            if (listDiv.style.display === 'none') {
+                // Show list
+                grid.innerHTML = '';
+                Object.keys(animals).forEach(animal => {
+                    const tag = document.createElement('div');
+                    tag.className = 'animal-tag';
+                    tag.textContent = animals[animal].emoji + ' ' + animal;
+                    tag.onclick = () => showAnimal(animal);
+                    grid.appendChild(tag);
+                });
+                listDiv.style.display = 'block';
+            } else {
+                // Hide list
+                listDiv.style.display = 'none';
+            }
+        }
+
+        function speakInstructions() {
+            if (!speechSynthesis) return;
+            
+            speechSynthesis.cancel();
+            
+            const instructions = new SpeechSynthesisUtterance(
+                'Welcome to the Animal Name Game! Click the big microphone button and say the name of any animal. ' +
+                'I\'ll show you the animal and tell you three amazing facts about it. ' +
+                'You can also click "Show Animals List" to see all the animals you can learn about. Have fun exploring!'
+            );
+            
+            setBritishVoice(instructions);
+            speechSynthesis.speak(instructions);
+        }
+
+        // Load voices when they're ready
+        if (speechSynthesis) {
+            speechSynthesis.onvoiceschanged = function() {
+                console.log('Voices loaded');
+            };
+        }
+    </script>
+</body>
+</html>
