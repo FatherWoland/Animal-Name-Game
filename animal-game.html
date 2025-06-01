@@ -855,6 +855,11 @@
         function speakAnimalFacts(animalName, facts) {
             if (!speechSynthesis) return;
             
+            // Stop listening while speaking
+            if (isListening) {
+                recognition.stop();
+            }
+            
             // Cancel any ongoing speech
             speechSynthesis.cancel();
             
@@ -866,14 +871,31 @@
             // Set British accent if available
             setBritishVoice(intro);
             
-            speechSynthesis.speak(intro);
+            // Queue all utterances
+            const utterances = [intro];
             
-            // Speak each fact
+            // Add each fact
             facts.forEach((fact, index) => {
                 const utterance = new SpeechSynthesisUtterance(
                     `Fact number ${index + 1}: ${fact}`
                 );
                 setBritishVoice(utterance);
+                utterances.push(utterance);
+            });
+            
+            // Set up completion handler on the last utterance
+            utterances[utterances.length - 1].onend = function() {
+                // Wait a moment then restart listening
+                setTimeout(() => {
+                    if (recognition && !isListening) {
+                        recognition.start();
+                        updateStatus('Ready to learn about another animal! Say a name!');
+                    }
+                }, 1000);
+            };
+            
+            // Speak all utterances
+            utterances.forEach(utterance => {
                 speechSynthesis.speak(utterance);
             });
         }
@@ -881,8 +903,17 @@
         function setBritishVoice(utterance) {
             const voices = speechSynthesis.getVoices();
             
-            // Try to find a British English voice
-            const britishVoice = voices.find(voice => 
+            // Try to find a British English female voice
+            const britishFemaleVoice = voices.find(voice => 
+                (voice.lang === 'en-GB' || voice.name.includes('British') || voice.name.includes('UK')) &&
+                (voice.name.includes('Female') || voice.name.includes('female') || 
+                 voice.name.includes('Woman') || voice.name.includes('woman') ||
+                 voice.name.includes('Emma') || voice.name.includes('Amy') || 
+                 voice.name.includes('Nicole') || voice.name.includes('Rachel'))
+            );
+            
+            // Fallback to any British voice
+            const britishVoice = britishFemaleVoice || voices.find(voice => 
                 voice.lang === 'en-GB' || 
                 voice.name.includes('British') ||
                 voice.name.includes('UK')
@@ -892,9 +923,9 @@
                 utterance.voice = britishVoice;
             }
             
-            // Set speech parameters for friendly tone
-            utterance.rate = 0.9; // Slightly slower for clarity
-            utterance.pitch = 1.1; // Slightly higher for friendliness
+            // Set speech parameters for friendly female tone
+            utterance.rate = 0.75; // Slower for better clarity for children
+            utterance.pitch = 1.2; // Higher pitch for female voice
             utterance.volume = 1.0;
         }
 
